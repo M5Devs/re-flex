@@ -14,13 +14,13 @@ const (
 )
 
 type User struct {
-	ID                 string         `json:"id"`
-	Username           string         `json:"username"`
-	IdentifierType     IdentifierType `json:"identifier_type"`
-	IdentifierValue    string         `json:"identifier_value"`
-	PasswordHash       string         `json:"-"`
-	PublicIdentityKey  string         `json:"public_identity_key"`
-	CreatedAt          time.Time      `json:"created_at"`
+	ID                string         `json:"id"`
+	Username          string         `json:"username"`
+	IdentifierType    IdentifierType `json:"identifier_type"`
+	IdentifierValue   string         `json:"identifier_value"`
+	PasswordHash      string         `json:"-"`
+	PublicIdentityKey string         `json:"public_identity_key"`
+	CreatedAt         time.Time      `json:"created_at"`
 }
 
 type RegisterRequest struct {
@@ -51,7 +51,22 @@ type JWTClaims struct {
 	jwt.RegisteredClaims
 }
 
+type OfflineMessage struct {
+	ID                string    `json:"id"`
+	SenderID          string    `json:"sender_id"`
+	SenderUsername    string    `json:"sender_username,omitempty"`
+	RecipientID       string    `json:"recipient_id"`
+	RecipientUsername string    `json:"recipient_username,omitempty"`
+	ClientMsgID       string    `json:"client_msg_id,omitempty"`
+	Payload           string    `json:"payload"`
+	Status            string    `json:"status"` // "pending", "delivered"
+	CreatedAt         time.Time `json:"created_at"`
+}
+
 type WSFrame struct {
-	Type    string      `json:"type"` // "ping", "pong", "message", "ack"
-	Payload interface{} `json:"payload,omitempty"`
+	Type              string      `json:"type"` // "ping", "pong", "message", "ack", "direct_message", "ack_delivered", "ack_queued"
+	RecipientUsername string      `json:"recipient_username,omitempty"`
+	SenderUsername    string      `json:"sender_username,omitempty"`
+	ClientMsgID       string      `json:"client_msg_id,omitempty"`
+	Payload           interface{} `json:"payload,omitempty"`
 }

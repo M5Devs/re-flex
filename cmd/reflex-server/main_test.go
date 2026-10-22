@@ -33,7 +33,7 @@ func setupTestServer(t *testing.T) (*httptest.Server, func()) {
 
 	hub := gateway.NewHub()
 	go hub.Run()
-	gwHdr := gateway.NewHandler(hub, tm)
+	gwHdr := gateway.NewHandler(hub, tm, db)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("POST /api/v1/auth/register", authHdr.Register)

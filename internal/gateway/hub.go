@@ -5,17 +5,19 @@ import (
 )
 
 type Hub struct {
-	clients    map[string]*Client // key: client ID or userID
-	mu         sync.RWMutex
-	register   chan *Client
-	unregister chan *Client
+	clients           map[string]*Client // key: client ID
+	clientsByUsername map[string]*Client // key: username
+	mu                sync.RWMutex
+	register          chan *Client
+	unregister        chan *Client
 }
 
 func NewHub() *Hub {
 	return &Hub{
-		clients:    make(map[string]*Client),
-		register:   make(chan *Client),
-		unregister: make(chan *Client),
+		clients:           make(map[string]*Client),
+		clientsByUsername: make(map[string]*Client),
+		register:          make(chan *Client),
+		unregister:        make(chan *Client),
 	}
 }
 
@@ -25,11 +27,17 @@ func (h *Hub) Run() {
 		case client := <-h.register:
 			h.mu.Lock()
 			h.clients[client.ID] = client
+			if client.Username != "" {
+				h.clientsByUsername[client.Username] = client
+			}
 			h.mu.Unlock()
 		case client := <-h.unregister:
 			h.mu.Lock()
 			if _, ok := h.clients[client.ID]; ok {
 				delete(h.clients, client.ID)
+				if client.Username != "" && h.clientsByUsername[client.Username] == client {
+					delete(h.clientsByUsername, client.Username)
+				}
 				close(client.send)
 			}
 			h.mu.Unlock()
@@ -49,6 +57,13 @@ func (h *Hub) GetClient(id string) (*Client, bool) {
 	h.mu.RLock()
 	defer h.mu.RUnlock()
 	client, ok := h.clients[id]
+	return client, ok
+}
+
+func (h *Hub) GetClientByUsername(username string) (*Client, bool) {
+	h.mu.RLock()
+	defer h.mu.RUnlock()
+	client, ok := h.clientsByUsername[username]
 	return client, ok
 }
 

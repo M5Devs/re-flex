@@ -13,9 +13,9 @@ import (
 )
 
 var (
-	ErrUserAlreadyExists = errors.New("user with this username or identifier already exists")
+	ErrUserAlreadyExists  = errors.New("user with this username or identifier already exists")
 	ErrInvalidCredentials = errors.New("invalid identifier or password")
-	ErrUserNotFound      = errors.New("user not found")
+	ErrUserNotFound       = errors.New("user not found")
 )
 
 type Service struct {
