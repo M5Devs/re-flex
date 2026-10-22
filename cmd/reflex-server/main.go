@@ -25,7 +25,7 @@ func main() {
 
 	hub := gateway.NewHub()
 	go hub.Run()
-	gatewayHandler := gateway.NewHandler(hub, tokenManager)
+	gatewayHandler := gateway.NewHandler(hub, tokenManager, db)
 
 	mux := http.NewServeMux()
 

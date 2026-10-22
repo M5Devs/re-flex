@@ -1,6 +1,7 @@
 package gateway
 
 import (
+	"database/sql"
 	"net/http"
 	"strings"
 
@@ -13,12 +14,14 @@ import (
 type Handler struct {
 	hub          *Hub
 	tokenManager *auth.TokenManager
+	db           *sql.DB
 }
 
-func NewHandler(hub *Hub, tokenManager *auth.TokenManager) *Handler {
+func NewHandler(hub *Hub, tokenManager *auth.TokenManager, db *sql.DB) *Handler {
 	return &Handler{
 		hub:          hub,
 		tokenManager: tokenManager,
+		db:           db,
 	}
 }
 
@@ -43,11 +46,12 @@ func (h *Handler) ServeWS(w http.ResponseWriter, r *http.Request) {
 	}
 
 	clientID := uuid.New().String()
-	client := NewClient(clientID, claims.UserID, claims.Username, h.hub, conn)
+	client := NewClient(clientID, claims.UserID, claims.Username, h.hub, conn, h.db)
 	h.hub.Register(client)
 
 	ctx := r.Context()
 	go client.WritePump(ctx)
+	go client.flushOfflineMessages(ctx)
 	client.ReadPump(ctx)
 }
 
