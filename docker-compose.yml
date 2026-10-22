@@ -1,0 +1,15 @@
+services:
+  reflex-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: reflex-server
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      - JWT_SECRET=change-this-secret-in-production
+      - DB_PATH=/app/data/reflex.db
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
